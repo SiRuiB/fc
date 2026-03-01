@@ -1,5 +1,16 @@
 "use client";
 
+<div className="flex items-start justify-between gap-3">
+  <div>
+    <h1 className="text-2xl font-semibold">Action Cards</h1>
+    <p className="text-sm opacity-70 mt-1">
+      Extracted policy changes with risk scoring and operational next steps.
+    </p>
+  </div>
+</div>
+
+
+
 import { useEffect, useMemo, useState } from "react";
 
 type ScenarioListRow = {

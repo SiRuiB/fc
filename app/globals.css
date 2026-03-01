@@ -1,8 +1,16 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Brand gradient inspired by your logo */
+  --fc-red: 220 38 38;      /* red-600-ish */
+  --fc-orange: 249 115 22;  /* orange-500-ish */
+  --fc-gold: 245 158 11;    /* amber-500-ish */
+
+  /* UI neutrals */
+  --fc-bg: 245 245 245;     /* neutral-100 */
+  --fc-card: 255 255 255;   /* white */
+  --fc-border: 228 228 231; /* zinc-200 */
+  --fc-text: 15 23 42;      /* slate-900 */
 }
 
 @theme inline {
@@ -19,8 +27,31 @@
   }
 }
 
+
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: rgb(var(--fc-bg));
+  color: rgb(var(--fc-text));
+}
+
+/* FC gradient utility (use on primary buttons) */
+.fc-gradient {
+  background: linear-gradient(
+    90deg,
+    rgb(var(--fc-red)),
+    rgb(var(--fc-orange)),
+    rgb(var(--fc-gold))
+  );
+}
+
+/* Optional: gradient text utility for headings */
+.fc-gradient-text {
+  background: linear-gradient(
+    90deg,
+    rgb(var(--fc-red)),
+    rgb(var(--fc-orange)),
+    rgb(var(--fc-gold))
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }

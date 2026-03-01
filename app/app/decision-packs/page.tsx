@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { StatusPill } from "@/components/StatusPill";
 
 type Row = {
   id: string;
@@ -12,6 +13,12 @@ type Row = {
   action_card_id: string;
 };
 
+function fmtDateTime(s: string) {
+  const d = new Date(s);
+  if (Number.isNaN(d.getTime())) return s;
+  return d.toLocaleString();
+}
+
 export default function DecisionPacksPage() {
   const [rows, setRows] = useState<Row[]>([]);
   const [msg, setMsg] = useState("");
@@ -19,12 +26,24 @@ export default function DecisionPacksPage() {
   async function load() {
     setMsg("Loading...");
     const res = await fetch("/api/decision-packs", { cache: "no-store" });
-    const json = await res.json();
+
+    const text = await res.text();
+    let json: any = null;
+    try {
+      json = text ? JSON.parse(text) : null;
+    } catch {
+      json = null;
+    }
+
     if (!res.ok) {
-      setMsg(`Error: ${json.error}`);
+      const err =
+        json?.error ??
+        `HTTP ${res.status}. Non-JSON response: ${text?.slice(0, 300) || "(empty)"}`;
+      setMsg(`Error: ${err}`);
       return;
     }
-    setRows(json.rows ?? []);
+
+    setRows(json?.rows ?? []);
     setMsg("");
   }
 
@@ -33,40 +52,65 @@ export default function DecisionPacksPage() {
   }, []);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
+      {/* Header */}
       <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Decision Packs</h1>
-        <button className="rounded-md border px-3 py-1 text-sm" onClick={load}>
+        <div>
+          <h1 className="text-2xl font-semibold">Decision Packs</h1>
+          <p className="text-sm opacity-70 mt-1">
+            Approval-ready memos with levers, scope, actions, evidence, and audit trail.
+          </p>
+        </div>
+
+        <button
+          className="rounded-md border bg-white px-3 py-1.5 text-sm hover:bg-neutral-50 shadow-sm"
+          onClick={load}
+        >
           Refresh
         </button>
       </div>
 
       {msg ? <div className="text-sm opacity-70">{msg}</div> : null}
 
-      <div className="rounded-lg border p-4 space-y-2">
-        {rows.map((r) => (
-          <Link
-            key={r.id}
-            href={`/app/decision-packs/${r.id}`}
-            className="block rounded-md border p-3 hover:bg-neutral-50"
-          >
-            <div className="flex items-center justify-between">
-              <div className="font-medium">{r.title}</div>
-              <div className="text-xs rounded-md border px-2 py-1">
-                {r.status}
-              </div>
-            </div>
-            <div className="text-xs opacity-70 mt-1">
-              {r.country_code ?? "—"} · Updated {new Date(r.updated_at).toLocaleString()}
-            </div>
-          </Link>
-        ))}
+      {!rows.length && !msg ? (
+        <div className="rounded-2xl border bg-white p-6 text-sm opacity-70 shadow-sm">
+          No decision packs yet. Generate one from an action card.
+        </div>
+      ) : null}
 
-        {!rows.length ? (
-          <div className="text-sm opacity-70">
-            No decision packs yet. Generate one from an action card (next step).
-          </div>
-        ) : null}
+      {/* List container */}
+      <div className="rounded-2xl border bg-white p-4 shadow-sm">
+        <div className="divide-y">
+          {rows.map((r) => (
+            <Link
+              key={r.id}
+              href={`/app/decision-packs/${r.id}`}
+              className="block px-3 py-4 hover:bg-neutral-50 transition-colors"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="font-semibold truncate">{r.title}</div>
+                    {r.country_code ? (
+                      <span className="inline-flex items-center rounded-full border bg-neutral-50 px-2 py-0.5 text-xs font-medium">
+                        {r.country_code}
+                      </span>
+                    ) : null}
+                  </div>
+
+                  <div className="text-xs opacity-70 mt-2">
+                    Updated {fmtDateTime(r.updated_at)}
+                  </div>
+                </div>
+
+                <div className="shrink-0 flex items-center gap-2">
+                  <StatusPill status={r.status} />
+                  <span className="text-xs opacity-60">Open →</span>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </div>
   );

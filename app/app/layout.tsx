@@ -7,6 +7,7 @@ const nav = [
   { href: "/app/map", label: "Risk Map" },
   { href: "/app/simulator", label: "Simulator" },
   { href: "/app/policy-log", label: "Ingest" },
+  { href: "/app/review", label: "Review Queue" }, // ✅ add this
 ];
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
